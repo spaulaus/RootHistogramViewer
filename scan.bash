@@ -6,7 +6,8 @@ echo "We need a histogram name"
 exit
 fi
 
-data=${HOME}/data/ithemba/pr248/pr248-svp_003.ldf
-cfg=issue120.xml
+prog=${HOME}/programs/laughing-conqueror/cmake-build-release/Analysis/Utkscan/utkscan
+data=${HOME}/data/utk/pixieworkshop/pulser_003.ldf
+cfg=issue126.xml
 
-./utkscan -b -i $data -c $cfg -o $1
+$prog -b -i $data -c $cfg -o $1

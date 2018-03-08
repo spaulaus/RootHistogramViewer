@@ -2,40 +2,52 @@
 <Configuration>
     <Author>
         <Name>S. V. Paulauskas</Name>
-        <Email>stanpaulauskas@gmail.com</Email>
-        <Date>February 28, 2017</Date>
     </Author>
 
     <Description>
-        A timing setup to measure time difference between two pulser signals
+        File to debug Issue 120. 
+	Data file is pr248-svp_003.ldf
     </Description>
 
     <Global>
         <Revision version="F"/>
         <EventWidth unit="s" value="1e-6"/>
-        <HasRaw value="false"/>
+        <HasRaw value="true"/>
     </Global>
 
     <DetectorDriver>
-        <Analyzer name="WaveformAnalyzer"/>
-        <Analyzer name="FittingAnalyzer" type="gsl"/>
-        <Processor name="TwoChanTimingProcessor"/>
+        <Processor name="CloverProcessor"/>
     </DetectorDriver>
 
     <Map>
-        <Module number="0" firmware="30474" frequency="250">
-            <Channel number="0" type="pulser" subtype="start">
-                <Fit beta="0.4335" gamma="0.03985"/>
-                <Trace RangeLow="8" RangeHigh="20" baselineThreshold="3" delay="50"/>
-            </Channel>
-            <Channel number="1" type="pulser" subtype="stop">
-                <Fit beta="0.4335" gamma="0.03985"/>
-                <Trace RangeLow="8" RangeHigh="20" baselineThreshold="3" delay="50"/>
-            </Channel>
+        <Module number="0" firmware="34455" frequency="250">
+            <Channel number="0" type="ge" subtype="clover_high"></Channel>
+            <Channel number="1" type="plastic" subtype="dE"></Channel>
+            <Channel number="4" type="ge" subtype="clover_high"></Channel>
+            <Channel number="8" type="ge" subtype="clover_high"></Channel>
+            <Channel number="9" type="ci" subtype="currentIntegrator"></Channel>
+            <Channel number="12" type="ge" subtype="clover_high"></Channel>
         </Module>
     </Map>
 
-    <!-- Empty since we are not doing any cross event correlations -->
-    <TreeCorrelator name="root" verbose="False">
+    <TreeCorrelator name="root" verbose="false">
+        <Place type="PlaceOR" name="Beta" fifo="10">
+            <Place type="PlaceThreshold" name="plastic_dE_0"
+                   low_limit="50.0" high_limit="16382" fifo="5"
+                   replace="true"/>
+        </Place>
+
+        <Place type="PlaceOR" name="Gamma">
+            <Place type="PlaceOR" name="Clover0">
+                <Place type="PlaceThreshold" name="ge_clover_high_0-3"
+                       low_limit="20.0" high_limit="99999"
+                       replace="true"/>
+            </Place>
+        </Place>
+
+        <Place type="PlaceDetector" name="TapeMove" reset="false"/>
+        <Place type="PlaceDetector" name="Beam" reset="false"/>
+        <Place type="PlaceDetector" name="Cycle" reset="false"/>
     </TreeCorrelator>
+
 </Configuration>

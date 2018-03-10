@@ -1,12 +1,15 @@
 #include <TFile.h>
 #include <TH1.h>
 
+#include <iostream>
+
 void viewOnline(TFile *file, const int &id) {
+    const char *name = ("h"+std::to_string(id)).c_str();
     file->ReadKeys();
-    delete file->FindObject(("h"+std::to_string(id)).c_str());
-    TH1I *h1;
-    file->GetObject(("h"+std::to_string(id)).c_str(), h1);
-    h1->Draw();
+    delete file->FindObject(name);
+    TH1I *hist1;
+    file->GetObject(name, hist1);
+    hist1->Draw();
 }
 
 //void dd(unsigned int &id) {

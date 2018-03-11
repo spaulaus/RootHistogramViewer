@@ -1,6 +1,8 @@
 #include <TFile.h>
 #include <TH1.h>
 
+#include <iostream>
+
 void viewOnline(TFile *file, const int &id) {
     const char *name = ("h"+std::to_string(id)).c_str();
     TH1I *hist1 = nullptr;
@@ -9,6 +11,7 @@ void viewOnline(TFile *file, const int &id) {
         file->ReadKeys();
         delete file->FindObject(name);
         file->GetObject(name, hist1);
+        //usleep(100000);
     }
     hist1->Draw();
 }

@@ -18,7 +18,7 @@
 
     <DetectorDriver>
         <Analyzer name="WaveformAnalyzer"/>
-        <Analyzer name="FittingAnalyzer" type="root"/>
+        <Analyzer name="FittingAnalyzer" type="gsl"/>
         <Processor name="TwoChanTimingProcessor"/>
     </DetectorDriver>
 

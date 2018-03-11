@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -z "$2" ]
+if [ -z "$1" ]
 then 
     echo "We need to know which data set you want"
     echo "0 = Firmware 34455 - PR248 - iThemba LABS"
@@ -8,11 +8,11 @@ then
     exit
 fi
 
-if [[ $2 == 1 ]]
+if [[ $1 == 0 ]]
 then
     data=${HOME}/data/ithemba/pr248/pr248-svp_003.ldf
     name=issue126-pr248
-elif [[ $2 == 2 ]]
+elif [[ $1 == 1 ]]
 then
     data=${HOME}/data/utk/pixieworkshop/pulser_003.ldf
     name=issue126-pulser

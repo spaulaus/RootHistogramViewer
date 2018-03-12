@@ -19,7 +19,7 @@
     <DetectorDriver>
         <Analyzer name="WaveformAnalyzer"/>
         <Analyzer name="FittingAnalyzer" type="gsl"/>
-        <Processor name="TwoChanTimingProcessor"/>
+        <!--<Processor name="TwoChanTimingProcessor"/>-->
     </DetectorDriver>
 
     <Map>

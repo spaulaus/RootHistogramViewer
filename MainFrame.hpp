@@ -32,6 +32,11 @@
 #include <TList.h>
 #include <TApplication.h>
 #include <TFile.h>
+#include <TKey.h>
+#include <TH2D.h>
+#include <TH3D.h>
+
+#include <string>
 
 ///@brief
 class MainFrame : public TGMainFrame {
@@ -42,18 +47,37 @@ public:
     /// Default Destructor
     ~MainFrame();
 
-    MainFrame(const TGWindow *p, UInt_t w, UInt_t h, TApplication *a);
+    MainFrame(const TGWindow *p, TApplication *a);
 
-    void DoExit();
+    void Exit();
 
     void PlotSelected();
+
+    void SetHistogramBounds();
 private:
+    void Initialize(TApplication *app);
+    void PopulateHistogramList();
+    void AddHistogramListToFrame();
+    void SetupControlButtons();
+
     TGListBox *fListBox;
     TGCheckButton *fCheckMulti;
     TList *fSelected;
     TApplication *app_;
     TFile *file_;
     TCanvas *canvas_;
+    TGNumberEntry *fNumber;
+    TGNumberEntry *fNumber1;
+    TGGroupFrame *fGframe;
+
+    TH1D *hist1d;
+    TH2D *hist2d;
+    TH3D *hist3d;
+
+    static constexpr unsigned int frameWidth_ = 350;
+    static constexpr unsigned int halfFrameWidth_ = frameWidth_ / 2;
+    static constexpr unsigned int histogramListHeight_ = 200;
+    static constexpr auto frameName_ = "Histogram Viewer";
 
 ClassDef(MainFrame, 1)
 };

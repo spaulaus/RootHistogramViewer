@@ -12,7 +12,7 @@
 int main() {
     try {
         TApplication app("app", nullptr, nullptr);
-        new MainFrame(gClient->GetRoot(), 200, 200, &app);
+        new MainFrame(gClient->GetRoot(), &app);
         app.Run();
     } catch (std::exception &ex) {
         std::cout << "Exception Caught : " << ex.what() << std::endl;

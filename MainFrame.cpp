@@ -7,10 +7,6 @@
 
 #include "MainFrame.hpp"
 
-#include <TKey.h>
-#include <TH2D.h>
-#include <TH3D.h>
-
 ClassImp(MainFrame)
 
 MainFrame::MainFrame() = default;
@@ -24,10 +20,13 @@ MainFrame::~MainFrame() {
     }
 }
 
-MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h, TApplication *a) : TGMainFrame(p, w, h) {
-    app_ = a;
+void MainFrame::Initialize(TApplication *app) {
+    app_ = app;
     file_ = new TFile("../issue126-pulser.root");
     canvas_ = new TCanvas("canvas", "");
+    hist1d = nullptr;
+    hist2d = nullptr;
+    hist3d = nullptr;
 
     canvas_->ToggleEditor();
     canvas_->ToggleEventStatus();
@@ -35,77 +34,113 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h, TApplication *a) : T
 
     fListBox = new TGListBox(this, 89);
     fSelected = new TList;
-    char tmp[40];
-    unsigned int counter = 0;
-    for (auto &&keyAsTObj : *(file_->GetListOfKeys())) {
-        auto key = (TKey*) keyAsTObj;
+}
 
-        if(key->IsFolder()) //TTrees are registered as folders, we want to skip those.
+void MainFrame::PopulateHistogramList() {
+    for (auto &&keyAsTObj : *(file_->GetListOfKeys())) {
+        auto key = (TKey *) keyAsTObj;
+
+        if (key->IsFolder()) //TTrees are registered as folders, we want to skip those.
             continue;
 
         auto obj = key->ReadObj();
-        fListBox->AddEntry(obj->GetName(), counter + 1);
-        counter++;
+        fListBox->AddEntry(obj->GetTitle(), std::stoi(std::string(obj->GetName(), 1, std::string::npos)));
     }
-    fListBox->Resize(300, 150);
+}
+
+void MainFrame::AddHistogramListToFrame() {
+    fListBox->Resize(frameWidth_, histogramListHeight_);
     AddFrame(fListBox, new TGLayoutHints(kLHintsTop | kLHintsLeft | kLHintsExpandX | kLHintsExpandY, 5, 5, 5, 5));
+}
 
+void MainFrame::SetupControlButtons() {
     // Create a horizontal frame containing button(s)
-    auto *hframe = new TGHorizontalFrame(this, 150, 20, kFixedWidth);
-    auto *show = new TGTextButton(hframe, "&Show");
+    auto *hframe = new TGHorizontalFrame(this, frameWidth_, 20, kFixedWidth);
 
-    show->SetToolTipText("Click here to print the selection you made");
+    auto *show = new TGTextButton(hframe, "&Show");
+    show->SetToolTipText("Click here to plot the selected histogram");
     show->Connect("Pressed()", "MainFrame", this, "PlotSelected()");
     hframe->AddFrame(show, new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
 
     auto *exit = new TGTextButton(hframe, "&Exit ");
-    exit->Connect("Pressed()", "MainFrame", this, "DoExit()");
-
+    exit->Connect("Pressed()", "MainFrame", this, "Exit()");
     hframe->AddFrame(exit, new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
-    AddFrame(hframe, new TGLayoutHints(kLHintsExpandX, 2, 2, 5, 1));
 
-    // Set a name to the main frame
-    SetWindowName("List Box");
-    MapSubwindows();
-
-    // Initialize the layout algorithm via Resize()
-    Resize(GetDefaultSize());
-
-    // Map main frame
-    MapWindow();
-    fListBox->Select(1);
+    AddFrame(hframe, new TGLayoutHints(kLHintsExpandX, 2, 2, 5, 1)); //Expands the buttons to fill the width
+    AddFrame(hframe, new TGLayoutHints(kLHintsBottom | kLHintsRight, 2, 2, 5, 1)); // positions buttons bottom right
 }
 
-void MainFrame::DoExit() {
+MainFrame::MainFrame(const TGWindow *p, TApplication *app) : TGMainFrame(p) {
+    Initialize(app);
+    PopulateHistogramList();
+    AddHistogramListToFrame();
+
+    auto boundsLabel = new TGLabel(this, "Histogram Bounds");
+    AddFrame(boundsLabel,  new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
+
+    auto *boundsFrame = new TGHorizontalFrame(this, frameWidth_, 20, kFixedWidth);
+
+    auto lowBoundLabel = new TGLabel(this, "Low :");
+    boundsFrame->AddFrame(lowBoundLabel, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
+
+    fNumber = new TGNumberEntry(this, 0, 9, 999, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAAnyNumber,
+                                TGNumberFormat::kNELLimitMinMax, -99999, 99999);
+    fNumber->Connect("ValueSet(Long_t)", "MainFrame", this, "SetHistogramBounds()");
+    (fNumber->GetNumberEntry())->Connect("ReturnPressed()", "MainFrame", this, "SetHistogramBounds()");
+    boundsFrame->AddFrame(fNumber, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
+
+    auto highBoundLabel = new TGLabel(this, "High :");
+    boundsFrame->AddFrame(highBoundLabel, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
+
+    fNumber1 = new TGNumberEntry(this, 0, 9, 999, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAAnyNumber,
+                                TGNumberFormat::kNELLimitMinMax, -99999, 99999);
+    fNumber1->Connect("ValueSet(Long_t)", "MainFrame", this, "SetHistogramBounds()");
+    (fNumber->GetNumberEntry())->Connect("ReturnPressed()", "MainFrame", this, "SetHistogramBounds()");
+    boundsFrame->AddFrame(fNumber, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
+
+    AddFrame(boundsFrame, new TGLayoutHints(kLHintsExpandX, 2, 2, 2, 2));
+    AddFrame(boundsFrame, new TGLayoutHints(kLHintsBottom, 2, 2, 2, 2));
+
+    SetupControlButtons();
+
+    SetWindowName(frameName_);
+    MapSubwindows();
+    Resize(GetDefaultSize());
+    MapWindow();
+}
+
+void MainFrame::Exit() {
     app_->Terminate(0);
 }
 
 void MainFrame::PlotSelected() {
     fSelected->Clear();
-    auto name = fListBox->GetEntry(fListBox->GetSelected())->GetTitle();
+    auto name = ("h" + std::to_string(fListBox->GetSelected())).c_str();
 
     delete file_->FindObject(name);
     file_->ReadKeys();
 
-    TH1D *hist1d = nullptr;
-    TH2D *hist2d = nullptr;
-    TH3D *hist3d = nullptr;
-
     canvas_->cd();
     file_->GetObject(name, hist1d);
-    if(hist1d) {
+    if (hist1d) {
         hist1d->Draw();
     } else {
         file_->GetObject(name, hist2d);
-        if(hist2d)
+        if (hist2d)
             hist2d->Draw("COLZ");
         else {
             file_->GetObject(name, hist3d);
-            if(hist3d)
+            if (hist3d)
                 hist3d->Draw("COLZ");
             else
                 std::cout << "Couldn't figure out how to draw histogram with ID " << name << std::endl;
         }
     }
     canvas_->Update();
+}
+
+void MainFrame::SetHistogramBounds() {
+    // Slot method connected to the ValueSet(Long_t) signal.
+    // It displays the value set in TGNumberEntry widget.
+    std::cout << fNumber->GetNumberEntry()->GetIntNumber() << std::endl;
 }

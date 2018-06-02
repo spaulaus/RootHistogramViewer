@@ -1,0 +1,6 @@
+.utkscan.cmd
+*.d
+*.so
+*.pcm
+*.root
+*.save

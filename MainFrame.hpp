@@ -53,7 +53,6 @@ public:
 
     void PlotSelected();
 
-    void SetHistogramBounds();
     void OpenFile();
 private:
     void Initialize(TApplication *app);
@@ -76,7 +75,6 @@ private:
     TH3D *hist3d;
 
     static constexpr unsigned int frameWidth_ = 350;
-    static constexpr unsigned int halfFrameWidth_ = frameWidth_ / 2;
     static constexpr unsigned int histogramListHeight_ = 200;
     static constexpr auto frameName_ = "Histogram Viewer";
 

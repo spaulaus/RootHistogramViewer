@@ -135,9 +135,3 @@ void MainFrame::PlotSelected() {
     }
     canvas_->Update();
 }
-
-void MainFrame::SetHistogramBounds() {
-    // Slot method connected to the ValueSet(Long_t) signal.
-    // It displays the value set in TGNumberEntry widget.
-    std::cout << fNumber->GetNumberEntry()->GetIntNumber() << std::endl;
-}

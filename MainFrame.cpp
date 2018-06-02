@@ -22,7 +22,7 @@ MainFrame::~MainFrame() {
 
 void MainFrame::Initialize(TApplication *app) {
     app_ = app;
-    file_ = new TFile("../issue126-pulser.root");
+    file_ = nullptr;
     canvas_ = new TCanvas("canvas", "");
     hist1d = nullptr;
     hist2d = nullptr;
@@ -34,9 +34,13 @@ void MainFrame::Initialize(TApplication *app) {
 
     fListBox = new TGListBox(this, 89);
     fSelected = new TList;
+
+    SetCleanup(kDeepCleanup);
 }
 
-void MainFrame::PopulateHistogramList() {
+void MainFrame::UpdateHistogramList() {
+    fListBox->RemoveAll();
+
     for (auto &&keyAsTObj : *(file_->GetListOfKeys())) {
         auto key = (TKey *) keyAsTObj;
 
@@ -46,6 +50,8 @@ void MainFrame::PopulateHistogramList() {
         auto obj = key->ReadObj();
         fListBox->AddEntry(obj->GetTitle(), std::stoi(std::string(obj->GetName(), 1, std::string::npos)));
     }
+    gClient->NeedRedraw(fListBox->GetContainer());
+    Layout();
 }
 
 void MainFrame::AddHistogramListToFrame() {
@@ -56,6 +62,11 @@ void MainFrame::AddHistogramListToFrame() {
 void MainFrame::SetupControlButtons() {
     // Create a horizontal frame containing button(s)
     auto *hframe = new TGHorizontalFrame(this, frameWidth_, 20, kFixedWidth);
+
+    auto *open = new TGTextButton(hframe, "&Open");
+    open->SetToolTipText("Click here to open a file");
+    open->Connect("Pressed()", "MainFrame", this, "OpenFile()");
+    hframe->AddFrame(open, new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
 
     auto *show = new TGTextButton(hframe, "&Show");
     show->SetToolTipText("Click here to plot the selected histogram");
@@ -70,38 +81,27 @@ void MainFrame::SetupControlButtons() {
     AddFrame(hframe, new TGLayoutHints(kLHintsBottom | kLHintsRight, 2, 2, 5, 1)); // positions buttons bottom right
 }
 
+void MainFrame::OpenFile() {
+    delete file_;
+    const char *filetypes[] = {"ROOT files", "*.root", nullptr, nullptr};
+    static TString dir(".");
+    TGFileInfo fi;
+    fi.fFileTypes = filetypes;
+    fi.fIniDir = StrDup(dir);
+    new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &fi);
+    printf("Open file: %s (dir: %s)\n", fi.fFilename, fi.fIniDir);
+    dir = fi.fIniDir;
+    file_ = new TFile(fi.fFilename);
+    UpdateHistogramList();
+}
+
 MainFrame::MainFrame(const TGWindow *p, TApplication *app) : TGMainFrame(p) {
     Initialize(app);
-    PopulateHistogramList();
-    AddHistogramListToFrame();
-
-    auto boundsLabel = new TGLabel(this, "Histogram Bounds");
-    AddFrame(boundsLabel,  new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
-
-    auto *boundsFrame = new TGHorizontalFrame(this, frameWidth_, 20, kFixedWidth);
-
-    auto lowBoundLabel = new TGLabel(this, "Low :");
-    boundsFrame->AddFrame(lowBoundLabel, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-
-    fNumber = new TGNumberEntry(this, 0, 9, 999, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAAnyNumber,
-                                TGNumberFormat::kNELLimitMinMax, -99999, 99999);
-    fNumber->Connect("ValueSet(Long_t)", "MainFrame", this, "SetHistogramBounds()");
-    (fNumber->GetNumberEntry())->Connect("ReturnPressed()", "MainFrame", this, "SetHistogramBounds()");
-    boundsFrame->AddFrame(fNumber, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-
-    auto highBoundLabel = new TGLabel(this, "High :");
-    boundsFrame->AddFrame(highBoundLabel, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-
-    fNumber1 = new TGNumberEntry(this, 0, 9, 999, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAAnyNumber,
-                                TGNumberFormat::kNELLimitMinMax, -99999, 99999);
-    fNumber1->Connect("ValueSet(Long_t)", "MainFrame", this, "SetHistogramBounds()");
-    (fNumber->GetNumberEntry())->Connect("ReturnPressed()", "MainFrame", this, "SetHistogramBounds()");
-    boundsFrame->AddFrame(fNumber, new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-
-    AddFrame(boundsFrame, new TGLayoutHints(kLHintsExpandX, 2, 2, 2, 2));
-    AddFrame(boundsFrame, new TGLayoutHints(kLHintsBottom, 2, 2, 2, 2));
-
     SetupControlButtons();
+    OpenFile();
+
+    if(file_)
+        AddHistogramListToFrame();
 
     SetWindowName(frameName_);
     MapSubwindows();

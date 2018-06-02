@@ -54,9 +54,10 @@ public:
     void PlotSelected();
 
     void SetHistogramBounds();
+    void OpenFile();
 private:
     void Initialize(TApplication *app);
-    void PopulateHistogramList();
+    void UpdateHistogramList();
     void AddHistogramListToFrame();
     void SetupControlButtons();
 

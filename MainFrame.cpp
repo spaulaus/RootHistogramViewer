@@ -82,17 +82,14 @@ void MainFrame::SetupControlButtons() {
 }
 
 void MainFrame::OpenFile() {
-    delete file_;
     const char *filetypes[] = {"ROOT files", "*.root", nullptr, nullptr};
-    static TString dir(".");
     TGFileInfo fi;
     fi.fFileTypes = filetypes;
-    fi.fIniDir = StrDup(dir);
     new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &fi);
-    printf("Open file: %s (dir: %s)\n", fi.fFilename, fi.fIniDir);
-    dir = fi.fIniDir;
-    file_ = new TFile(fi.fFilename);
-    UpdateHistogramList();
+    if(fi.fFilename) {
+        file_ = new TFile(fi.fFilename);
+        UpdateHistogramList();
+    }
 }
 
 MainFrame::MainFrame(const TGWindow *p, TApplication *app) : TGMainFrame(p) {

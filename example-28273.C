@@ -1,3 +1,10 @@
+///@file example-28273.C
+///@brief A program that will generate data and asynchronously write it to disk.
+/// https://root-forum.cern.ch/t/read-histogram-tree-from-tfile-while-actively-writing-to-it-with-example/28273
+///@author S. V. Paulauskas
+///@date March 12, 2018
+///@copyright Copyright (c) 2018 S. V. Paulauskas.
+///@copyright All rights reserved. Released under the Creative Commons Attribution-ShareAlike 4.0 International License
 #include <TFile.h>
 #include <TH1D.h>
 

@@ -6,3 +6,4 @@
 *.save
 .idea/
 cmake-build-*/
+build/

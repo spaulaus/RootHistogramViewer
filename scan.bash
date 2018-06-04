@@ -21,6 +21,6 @@ else
     name=issue126-ornl
 fi 
 
-prog=/home/vincent/programs/laughing-conqueror/cmake-build-release/Analysis/Utkscan/utkscan
+prog=${HOME}/programs/paass-lc/cmake-build-release/Analysis/Utkscan/utkscan
 
 $prog -b -i $data -c $name.xml -o $name

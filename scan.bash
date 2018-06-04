@@ -23,4 +23,4 @@ fi
 
 prog=${HOME}/programs/paass/cmake-build-release/Analysis/Utkscan/utkscan
 
-$prog -b -i $data -c $name.xml -o $name
+$prog -i $data -c $name.xml -o $name

@@ -116,14 +116,9 @@ void MainFrame::PlotSelected() {
 
     file_ = TFile::Open(file_->GetName());
 
-    TH1D *temp1d = nullptr;
-    TH2D *temp2d = nullptr;
-    TH3D *temp3d = nullptr;
-
     canvas_->cd();
-    file_->GetObject(name, temp1d);
-    if (temp1d) {
-        clone
+    file_->GetObject(name, hist1d);
+    if (hist1d) {
         hist1d->Draw();
     } else {
         file_->GetObject(name, hist2d);

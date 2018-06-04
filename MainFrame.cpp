@@ -114,8 +114,7 @@ void MainFrame::PlotSelected() {
     fSelected->Clear();
     auto name = ("h" + std::to_string(fListBox->GetSelected())).c_str();
 
-    delete file_->FindObject(name);
-    file_->ReadKeys();
+    file_ = TFile::Open(file_->GetName());
 
     canvas_->cd();
     file_->GetObject(name, hist1d);

@@ -123,13 +123,13 @@ void MainFrame::PlotSelected() {
         hist1d->Draw();
     } else {
         file_->GetObject(name, hist2d);
-        if (hist2d)
+        if (hist2d) {
             hist2d->Draw("COLZ");
-        else {
+        } else {
             file_->GetObject(name, hist3d);
-            if (hist3d)
+            if (hist3d) {
                 hist3d->Draw("COLZ");
-            else
+            } else
                 std::cout << "Couldn't figure out how to draw histogram with ID " << name << std::endl;
         }
     }

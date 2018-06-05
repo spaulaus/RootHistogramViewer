@@ -35,6 +35,10 @@ void MainFrame::Initialize(TApplication *app) {
     fListBox = new TGListBox(this, 89);
     fSelected = new TList;
 
+    isFirstPlotCall_ = true;
+
+    axies1d_ = std::make_pair(TAxis(), TAxis());
+
     SetCleanup(kDeepCleanup);
 }
 
@@ -116,9 +120,19 @@ void MainFrame::PlotSelected() {
 
     file_ = TFile::Open(file_->GetName());
 
+    if(hist1d) {
+        isFirstPlotCall_ = false;
+        hist1d->GetXaxis()->Copy(axies1d_.first);
+        hist1d->GetYaxis()->Copy(axies1d_.second);
+    }
+
     canvas_->cd();
     file_->GetObject(name, hist1d);
     if (hist1d) {
+        if(!isFirstPlotCall_) {
+            hist1d->GetXaxis()->operator=(axies1d_.first);
+            hist1d->GetYaxis()->operator=(axies1d_.second);
+        }
         hist1d->Draw();
     } else {
         file_->GetObject(name, hist2d);

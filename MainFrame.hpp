@@ -74,6 +74,12 @@ private:
     TH2D *hist2d;
     TH3D *hist3d;
 
+    std::pair<TAxis, TAxis> axies1d_;
+    std::tuple<TAxis, TAxis, TAxis> axies2d_;
+    std::tuple<TAxis, TAxis, TAxis> axies3d_;
+
+    bool isFirstPlotCall_;
+
     static constexpr unsigned int frameWidth_ = 350;
     static constexpr unsigned int histogramListHeight_ = 200;
     static constexpr auto frameName_ = "Histogram Viewer";

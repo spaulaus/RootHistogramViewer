@@ -78,6 +78,8 @@ private:
     std::tuple<TAxis, TAxis, TAxis> axies2d_;
     std::tuple<TAxis, TAxis, TAxis> axies3d_;
 
+    std::map<int, std::tuple<bool, TAxis, TAxis, TAxis> > axisMap_;
+
     bool isFirstPlotCall_;
 
     static constexpr unsigned int frameWidth_ = 350;

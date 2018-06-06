@@ -52,7 +52,9 @@ void MainFrame::UpdateHistogramList() {
             continue;
 
         auto obj = key->ReadObj();
-        fListBox->AddEntry(obj->GetTitle(), std::stoi(std::string(obj->GetName(), 1, std::string::npos)));
+        auto id = std::stoi(std::string(obj->GetName(), 1, std::string::npos));
+        fListBox->AddEntry(obj->GetTitle(), id);
+        axisMap_.emplace(std::make_pair(id, std::make_tuple(true, TAxis(), TAxis(), TAxis())));
     }
     gClient->NeedRedraw(fListBox->GetContainer());
     Layout();
@@ -90,7 +92,7 @@ void MainFrame::OpenFile() {
     TGFileInfo fi;
     fi.fFileTypes = filetypes;
     new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &fi);
-    if(fi.fFilename) {
+    if (fi.fFilename) {
         file_ = new TFile(fi.fFilename);
         UpdateHistogramList();
     }
@@ -101,7 +103,7 @@ MainFrame::MainFrame(const TGWindow *p, TApplication *app) : TGMainFrame(p) {
     SetupControlButtons();
     OpenFile();
 
-    if(file_)
+    if (file_)
         AddHistogramListToFrame();
 
     SetWindowName(frameName_);
@@ -116,31 +118,95 @@ void MainFrame::Exit() {
 
 void MainFrame::PlotSelected() {
     fSelected->Clear();
-    auto name = ("h" + std::to_string(fListBox->GetSelected())).c_str();
+
+    auto id = fListBox->GetSelected();
+    auto name = "h" + std::to_string(id);
+    auto isFirstTimePlotting = std::get<0>(axisMap_.find(id)->second);
 
     file_ = TFile::Open(file_->GetName());
 
-    if(hist1d) {
-        isFirstPlotCall_ = false;
-        hist1d->GetXaxis()->Copy(axies1d_.first);
-        hist1d->GetYaxis()->Copy(axies1d_.second);
+    if (hist1d) {
+        auto histogramID = std::stoi(std::string(hist1d->GetName(), 1, std::string::npos));
+        bool isSameId = id == histogramID;
+
+        if (!isFirstTimePlotting && isSameId) {
+            hist1d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+            hist1d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
+        } else {
+            hist1d->GetXaxis()->Copy(std::get<1>(axisMap_.find(histogramID)->second));
+            hist1d->GetYaxis()->Copy(std::get<2>(axisMap_.find(histogramID)->second));
+        }
+    }
+
+    if (hist2d) {
+        auto histogramID = std::stoi(std::string(hist2d->GetName(), 1, std::string::npos));
+        bool isSameId = id == histogramID;
+
+        if (!isFirstTimePlotting && isSameId) {
+            hist2d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+            hist2d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
+            hist2d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+        } else {
+            hist2d->GetXaxis()->Copy(std::get<1>(axisMap_.find(histogramID)->second));
+            hist2d->GetYaxis()->Copy(std::get<2>(axisMap_.find(histogramID)->second));
+            hist2d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+        }
+    }
+
+    if (hist3d) {
+        auto histogramID = std::stoi(std::string(hist3d->GetName(), 1, std::string::npos));
+        bool isSameId = id == histogramID;
+
+        if (!isFirstTimePlotting && isSameId) {
+            hist2d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+            hist2d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
+            hist2d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+        } else {
+            hist2d->GetXaxis()->Copy(std::get<1>(axisMap_.find(histogramID)->second));
+            hist2d->GetYaxis()->Copy(std::get<2>(axisMap_.find(histogramID)->second));
+            hist2d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+        }
     }
 
     canvas_->cd();
-    file_->GetObject(name, hist1d);
+    file_->GetObject(name.c_str(), hist1d);
     if (hist1d) {
-        if(!isFirstPlotCall_) {
-            hist1d->GetXaxis()->operator=(axies1d_.first);
-            hist1d->GetYaxis()->operator=(axies1d_.second);
+        if (!isFirstTimePlotting) {
+            hist1d->GetXaxis()->operator=(std::get<1>(axisMap_.find(id)->second));
+            hist1d->GetYaxis()->operator=(std::get<2>(axisMap_.find(id)->second));
+        } else {
+            std::get<0>(axisMap_.find(id)->second) = false;
+            hist1d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+            hist1d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
         }
         hist1d->Draw();
     } else {
-        file_->GetObject(name, hist2d);
+        file_->GetObject(name.c_str(), hist2d);
         if (hist2d) {
+            if (!isFirstTimePlotting) {
+                hist2d->GetXaxis()->operator=(std::get<1>(axisMap_.find(id)->second));
+                hist2d->GetYaxis()->operator=(std::get<2>(axisMap_.find(id)->second));
+                hist2d->GetZaxis()->operator=(std::get<3>(axisMap_.find(id)->second));
+            } else {
+                std::get<0>(axisMap_.find(id)->second) = false;
+                hist2d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+                hist2d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
+                hist2d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+            }
             hist2d->Draw("COLZ");
         } else {
-            file_->GetObject(name, hist3d);
+            file_->GetObject(name.c_str(), hist3d);
             if (hist3d) {
+                if (!isFirstTimePlotting) {
+                    hist3d->GetXaxis()->operator=(std::get<1>(axisMap_.find(id)->second));
+                    hist3d->GetYaxis()->operator=(std::get<2>(axisMap_.find(id)->second));
+                    hist3d->GetZaxis()->operator=(std::get<3>(axisMap_.find(id)->second));
+                } else {
+                    std::get<0>(axisMap_.find(id)->second) = false;
+                    hist3d->GetXaxis()->Copy(std::get<1>(axisMap_.find(id)->second));
+                    hist3d->GetYaxis()->Copy(std::get<2>(axisMap_.find(id)->second));
+                    hist3d->GetZaxis()->Copy(std::get<3>(axisMap_.find(id)->second));
+                }
                 hist3d->Draw("COLZ");
             } else
                 std::cout << "Couldn't figure out how to draw histogram with ID " << name << std::endl;

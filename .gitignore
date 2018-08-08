@@ -1,9 +1,4 @@
-.utkscan.cmd
-*.d
-*.so
-*.pcm
-*.root
-*.save
 .idea/
 cmake-build-*/
 build/
+install/

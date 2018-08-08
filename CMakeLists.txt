@@ -19,3 +19,9 @@ target_link_libraries(rootHistogramViewer RootHistogramViewer)
 
 install(TARGETS rootHistogramViewer RootHistogramViewer RUNTIME DESTINATION bin LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/RootHistogramViewer/)
+
+file(GLOB dictionaryFiles ${CMAKE_BINARY_DIR}/lib*Dictionary*)
+install(FILES ${dictionaryFiles} DESTINATION lib)
+
+configure_file(share/modulefile/rootHistogramViewer modulefile/rootHistogramViewer @ONLY)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/modulefile share/scripts DESTINATION share/RootHistogramViewer)

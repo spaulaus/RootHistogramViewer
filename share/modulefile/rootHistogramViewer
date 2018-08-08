@@ -1,0 +1,19 @@
+#%Module1.0
+##
+## modulefiles/rootHistogramViewer
+##
+## @author S. V. Paulauskas
+
+proc ModulesHelp {} {
+	global version modroot
+
+	puts stderr "rootHistogramViewer - Provides GUI to read histograms from ROOT files."
+}
+module-whatis "rootHistogramViewer - Provides GUI to read histograms from ROOT files"
+
+set topdir 	@CMAKE_INSTALL_PREFIX@
+
+prepend-path PATH	$topdir/bin
+prepend-path LD_LIBRARY_PATH	$topdir/lib
+prepend-path CPLUS_INCLUDE_PATH	$topdir/include
+prepend-path LIBRARY_PATH	$topdir/lib

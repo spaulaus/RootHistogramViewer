@@ -1,15 +1,15 @@
-# ROOT Histogram GUI
-This is prototype code addressing [PAASS-LC Issue 126](https://github.com/spaulaus/paass-lc/issues/126). 
-It creates a GUI interface that users can use to read online and offline histograms from a `.root` file.
-Think of it like the TBrowser, but it automatically refreshes the keys when you try plot again.  
+# ROOT Histogram Viewer
+This program allows users to view histograms in a [ROOT](https://root.cern.ch/) file. Users can read histograms while
+another program fills the ROOT file. 
 
 # Prerequisites
-* cmake 3.5 +
+* cmake 3.10 +
 * ROOT 6.13/03 +
 
 # Build Instructions
 1. Create a build directory : `mkdir build`
 2. Change to the build directory : `cd build`
 3. Build the project : `cmake ../`
-4. Make the project : `make -j8`
-5. Run the program : `./issue126`
+4. Make/Install the project : `sudo make -j8 install`
+
+*Note* : You may need to export the lib directory to your LD_LIBRARY_PATH.

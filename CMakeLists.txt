@@ -18,4 +18,4 @@ target_include_directories(rootHistogramViewer SYSTEM BEFORE PUBLIC include PUBL
 target_link_libraries(rootHistogramViewer RootHistogramViewer)
 
 install(TARGETS rootHistogramViewer RootHistogramViewer RUNTIME DESTINATION bin LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/RootHistogramViewer/)
